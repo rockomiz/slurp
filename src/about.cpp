@@ -18,7 +18,8 @@
 #include <QDialog>
 #include <QLabel>
 #include <QString>
-#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPixmap>
 
 #include "globals.h"
 #include "about.h"
@@ -39,9 +40,16 @@ namespace slurp {
             Qt::WindowCloseButtonHint | 
             Qt::CustomizeWindowHint ) 
                 {
-                    layout = new QVBoxLayout(this);
+                    iconImage = new QPixmap("res/slurp.png");
+                    layout = new QHBoxLayout(this);
                     aboutLabel = new QLabel(aboutText, this);
-                    layout->addWidget( aboutLabel );
+                    iconLabel = new QLabel(this);
+
+                    iconLabel->setPixmap(*iconImage);
+
+                    layout->addWidget(iconLabel);
+                    layout->addWidget(aboutLabel);
+
                     setLayout(layout);
                 }
 

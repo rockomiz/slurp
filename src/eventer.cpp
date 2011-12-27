@@ -118,6 +118,8 @@ namespace slurp {
                      << runningParsers.count() 
                      << " running parsers";
         }
+
+        delete senderParser;
     } 
 
     void Eventer::stopCrawling() {
