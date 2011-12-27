@@ -55,11 +55,6 @@ namespace slurp {
 
         centralwidget = new QWidget(this);
 
-       /* label = new QLabel("Slurp", centralwidget);
-        label->setGeometry(QRect(20, 10, 471, 31));
-        label->setTextFormat(Qt::AutoText);
-        label->setAlignment(Qt::AlignCenter);*/
-
         progressBar = new QProgressBar(centralwidget);
         progressBar->setGeometry(QRect(20, 69, 481, 31));
         progressBar->setValue(0);

@@ -1,3 +1,5 @@
+implement a memory management system
+catch every single signal emitted by both qwebpage and the resulting qwebframes in an effort to discover when those objects are safe to delete
 periodically write results of crawl to a database
 improve progress reporting
 improve gui

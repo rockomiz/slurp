@@ -39,6 +39,7 @@ namespace slurp {
 
         QQueue < Parser* > queuedParsers;
         QVector < Parser* > runningParsers;
+        QSet < Parser* > finishedParsers; 
         QSet < QUrl > queuedUrls;
         QMap < QUrl , int > retryMap;
 
@@ -65,6 +66,7 @@ namespace slurp {
 
         void dispatchParsers();
         void parserProgress( int n );
+        void freeFinished();
 
     signals:
     

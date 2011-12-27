@@ -106,6 +106,8 @@ namespace slurp {
             qDebug() << "warning: got parserFinished() from an unknown source";
         }
 
+        finishedParsers.insert( senderParser );
+
         emit dispatchParsers(); 
         emit consumedUrls();
         emit statsChanged( queuedParsers.count(), queuedUrls.count() );
@@ -119,7 +121,7 @@ namespace slurp {
                      << " running parsers";
         }
 
-        delete senderParser;
+        emit freeFinished();
     } 
 
     void Eventer::stopCrawling() {
@@ -177,6 +179,14 @@ namespace slurp {
     
     void Eventer::parserProgress( int n ) {
         emit progressChanged( n );
+    }
+
+    void Eventer::freeFinished() {
+        foreach(Parser* cparser, finishedParsers ) {
+            qDebug() << "todo: (find out when it's safe to) delete " << cparser;
+        }
+
+        //finishedParsers.clear();
     }
 
     void Eventer::handleParseFailure( QUrl url, Parser* parser ) {
