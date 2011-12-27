@@ -95,9 +95,6 @@ namespace slurp {
         page->mainFrame()->load( url );
     }
 
-    /* The parses destructor. Qt tends to take care of a lot of memory management so 
-     * there's really nothing to do here but there may end up being some signals
-     * that need to be emitted in the future. */
     void Parser::cleanup() {
         qDebug() << "parser: cleaning up " << url;
     }   
@@ -122,7 +119,7 @@ namespace slurp {
         foreach(QWebElement current, linkTags) {
             currentUrl = QUrl( current.attribute( "href" ) );
             /* This discards the fragment. It is useless in this context and 
-             * will complicate our visited hashtable
+             * will complicate our visited hashtable.
              */
             currentUrl.setEncodedFragment( QByteArray() );
 
@@ -131,7 +128,7 @@ namespace slurp {
             }
             
             /* Prepend the parent URL if we have a relative link in an attempt to 
-             * validate it for retrieval
+             * validate it for retrieval.
              */
             if( currentUrl.isRelative() && 
                 currentUrl.host() == "" && 

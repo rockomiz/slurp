@@ -41,9 +41,7 @@ namespace slurp {
                 {
                     layout = new QVBoxLayout(this);
                     aboutLabel = new QLabel(aboutText, this);
-
                     layout->addWidget( aboutLabel );
-
                     setLayout(layout);
                 }
 

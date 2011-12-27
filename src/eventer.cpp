@@ -49,7 +49,7 @@ namespace slurp {
             qRegisterMetaType<parseResult>("parseResult");
 
             active = false;
-        }
+    }
 
     void Eventer::die(const char *errmsg, int errcode) {
         qFatal(errmsg);
@@ -77,7 +77,6 @@ namespace slurp {
         }
          
 		queuedUrls.insert( url );
-		
         queuedParsers.enqueue( new Parser( url ) );
 
         emit statsChanged( queuedParsers.count(), queuedUrls.count() );
@@ -166,7 +165,7 @@ namespace slurp {
 
         if( active && 
             runningParsers.count() == 0 && 
-            queuedParsers.count() == 0 ) {
+            queuedParsers.count()  == 0 ) {
                 qDebug() << "eventer: in dispatch parsers with"
                          << "nothing running and nothing queued";
                 active = false;

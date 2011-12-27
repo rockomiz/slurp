@@ -29,8 +29,6 @@
 using namespace slurp;
 
 int main(int argc, char **argv) {
-    QQueue < QString > seedUrls;
-
     Eventer::logFile.setFileName( "slurp.log" );
     Eventer::logFile.open( QIODevice::ReadWrite );
 
@@ -38,7 +36,7 @@ int main(int argc, char **argv) {
  
 	qDebug() << "slurp started up";
 
-    Eventer ev( argc, argv);
+    Eventer ev(argc, argv);
 
     Interacter inter;
 
@@ -67,6 +65,5 @@ int main(int argc, char **argv) {
                       &inter, SLOT( stopComplete() ) );
 
     inter.show();
-
     return ev.exec();
 }
