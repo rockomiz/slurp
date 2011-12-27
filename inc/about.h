@@ -21,15 +21,19 @@
 #include <QDialog>
 #include <QLabel>
 #include <QString>
-#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPixmap>
 
 namespace slurp {
 
     class About : public QDialog {
         Q_OBJECT
         
-        QLabel* aboutLabel;
-        QVBoxLayout* layout;
+
+        QLabel *aboutLabel, *iconLabel;
+        QHBoxLayout *layout;
+        QPixmap *iconImage;
+
         const static QString aboutText; 
 
         public:

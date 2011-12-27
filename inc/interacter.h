@@ -36,6 +36,7 @@
 #include <QtGui/QWidget>
 #include <QUrl>
 #include <QKeyEvent>
+#include <QIcon>
 
 #include "about.h"
 
@@ -53,6 +54,7 @@ namespace slurp {
         QLineEdit *urlEntry;
         QPushButton *crawlButton;
         QPushButton *aboutButton;
+        QIcon *icon;
         About* aboutBox;
 
         public:

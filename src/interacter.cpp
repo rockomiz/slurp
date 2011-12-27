@@ -34,6 +34,7 @@
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QTimer>
+#include <QIcon>
 
 #include <QDebug>
 
@@ -45,6 +46,9 @@
 namespace slurp {
 
     Interacter::Interacter() {
+        icon = new QIcon("res/slurp.png");
+
+        setWindowIcon(*icon);
         setFixedSize(512, 361);
 
         aboutBox = new About(this);
