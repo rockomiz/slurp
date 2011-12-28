@@ -73,8 +73,6 @@ namespace slurp {
         void parse();
         void loadProgress(int n);
         void pageLoadFinished(bool ok);
-        void frameCreated(QWebFrame* frame);
-        void frameLoadFinished(bool ok);
     };
 
 }   /* namespace slurp */

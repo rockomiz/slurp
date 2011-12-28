@@ -107,11 +107,6 @@ namespace slurp {
             this, SLOT(pageLoadFinished(bool)), 
             Qt::QueuedConnection);
 
-        QObject::connect(
-            page.data(), SIGNAL(frameCreated(QWebFrame*)),
-            this, SLOT(frameCreated(QWebFrame*)), 
-            Qt::QueuedConnection);
-
         qDebug() << "parser: initiating page load";
         page->mainFrame()->load( url );
     }
@@ -191,26 +186,4 @@ namespace slurp {
             emit parseFailed(url);
         }
     }
-
-    void Parser::frameCreated(QWebFrame* frame ) {
-        pageFrames.insert( frame );
-
-        QObject::connect( 
-            frame,
-            SIGNAL(loadFinished(bool)),
-            this,
-            SLOT(frameLoadFinished(bool)));
-    }
-
-    void Parser::frameLoadFinished(bool ok) {
-        qDebug() << "in parser: " << url 
-                 << " got frame finished (" << pageFrames.count() 
-                 << " total frames. status " << ok;
-
-        if(ok) { 
-
-
-        }
-    }
-
 }   /* namespace slurp */
