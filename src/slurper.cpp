@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     Eventer::logFile.setFileName( "slurp.log" );
     Eventer::logFile.open( QIODevice::ReadWrite );
 
-  //  qInstallMsgHandler( Eventer::debugHandler );
+    qInstallMsgHandler( Eventer::debugHandler );
  
 	qDebug() << "slurp started up";
 

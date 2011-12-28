@@ -40,7 +40,6 @@ namespace slurp {
 
         QQueue < QSharedPointer< Parser > > queuedParsers;
         QMap < QUrl, QSharedPointer < Parser > > runningParserMap;
-        QSet < QSharedPointer< Parser > > finishedParsers, failedParsers;
         QSet < QUrl > queuedUrls;
         QMap < QUrl , int > retryMap;
 

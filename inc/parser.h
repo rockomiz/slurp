@@ -41,6 +41,7 @@ namespace slurp {
         QSharedPointer< QWebPage > page;
         QList< QUrl > parsedUrls;
         QPointer< QNetworkAccessManager > networkManager;
+        QSet< QWebFrame* > pageFrames;
 
     public:
 
@@ -70,8 +71,10 @@ namespace slurp {
     private slots:
 
         void parse();
-        void loadProgress(int);
-        void pageLoadFinished(bool);
+        void loadProgress(int n);
+        void pageLoadFinished(bool ok);
+        void frameCreated(QWebFrame* frame);
+        void frameLoadFinished(bool ok);
     };
 
 }   /* namespace slurp */

@@ -41,19 +41,20 @@ namespace slurp {
     }
 
     Parser::~Parser() {
-        qDebug() << "destroying parser for " << url;
+        qDebug() 
+            << "destroying parser for " 
+            << url
+            << " with network manager " << networkManager 
+            << " and page instance " << page.data()
+            << " on thread " << thread();
 
-        QObject::disconnect(this, 0, 0, 0);
-
-        /*
         if( networkManager ) {
-            networkManager -> deleteLater();
-        }*/
+            networkManager->deleteLater();
+        }
 
-        /*
         if( page ) {
             page.clear();
-        }*/
+        }
     }
 	
     /* A public static function which is used to screen crawled URLs 
@@ -98,11 +99,18 @@ namespace slurp {
 
         QObject::connect(
             page.data(), SIGNAL(loadProgress(int)),
-            this, SLOT(loadProgress(int)));
+            this, SLOT(loadProgress(int)),
+            Qt::QueuedConnection);
         
         QObject::connect(
             page.data(), SIGNAL(loadFinished(bool)),
-            this, SLOT(pageLoadFinished(bool)));
+            this, SLOT(pageLoadFinished(bool)), 
+            Qt::QueuedConnection);
+
+        QObject::connect(
+            page.data(), SIGNAL(frameCreated(QWebFrame*)),
+            this, SLOT(frameCreated(QWebFrame*)), 
+            Qt::QueuedConnection);
 
         qDebug() << "parser: initiating page load";
         page->mainFrame()->load( url );
@@ -183,4 +191,26 @@ namespace slurp {
             emit parseFailed(url);
         }
     }
+
+    void Parser::frameCreated(QWebFrame* frame ) {
+        pageFrames.insert( frame );
+
+        QObject::connect( 
+            frame,
+            SIGNAL(loadFinished(bool)),
+            this,
+            SLOT(frameLoadFinished(bool)));
+    }
+
+    void Parser::frameLoadFinished(bool ok) {
+        qDebug() << "in parser: " << url 
+                 << " got frame finished (" << pageFrames.count() 
+                 << " total frames. status " << ok;
+
+        if(ok) { 
+
+
+        }
+    }
+
 }   /* namespace slurp */

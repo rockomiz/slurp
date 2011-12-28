@@ -84,7 +84,6 @@ namespace slurp {
             return ;
         }
 
-        finishedParsers.insert( runningParserMap[seed] );
         QSharedPointer< Parser > thisParser = runningParserMap.take( seed );
 
         foreach( QUrl currentUrl, thisParser -> getResults() ) {
@@ -124,18 +123,21 @@ namespace slurp {
             QObject::connect(queuedParser.data(), 
                 SIGNAL(finished(QUrl)), 
                 this, 
-                SLOT(parserFinished(QUrl)));
+                SLOT(parserFinished(QUrl)), 
+                Qt::QueuedConnection);
 
                 
             QObject::connect(queuedParser.data(), 
                 SIGNAL(progress(int)),
                 this, 
-                SLOT(parserProgress(int)));
+                SLOT(parserProgress(int)), 
+                Qt::QueuedConnection);
 
             QObject::connect(queuedParser.data(), 
                 SIGNAL(parseFailed(QUrl)),
                 this, 
-                SLOT(handleParseFailure(QUrl)));
+                SLOT(handleParseFailure(QUrl)), 
+                Qt::QueuedConnection);
 
             runningParserMap.insert( queuedParser -> getUrl() , queuedParser );
 			
@@ -171,7 +173,6 @@ namespace slurp {
         qDebug() << url << " has failed to parse " 
                  << retryMap[url] << " times";
 
-        failedParsers.insert( runningParserMap[ url ] );
         runningParserMap.remove( url );
 
         emit addUrl( url );
