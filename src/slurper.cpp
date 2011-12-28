@@ -61,8 +61,8 @@ int main(int argc, char **argv) {
                       &inter, SLOT( newUrl( QUrl ) ),
                       Qt::QueuedConnection);
 
-    QObject::connect( &ev, SIGNAL( statsChanged(int, int) ),
-                      &inter, SLOT( updateStats(int, int) ),
+    QObject::connect( &ev, SIGNAL( statsChanged(int, int, double) ),
+                      &inter, SLOT( updateStats(int, int, double) ),
                       Qt::QueuedConnection);
 
     QObject::connect( &ev, SIGNAL( progressChanged(int) ),

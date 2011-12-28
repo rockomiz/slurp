@@ -59,6 +59,9 @@ namespace slurp {
         progressBar->setGeometry(QRect(20, 69, 481, 31));
         progressBar->setValue(0);
 
+        bitrateNumber = new QLCDNumber(centralwidget);
+        bitrateNumber->setGeometry(QRect(20, 207, 64, 23));
+
         queuedNumber = new QLCDNumber(centralwidget);
         queuedNumber->setGeometry(QRect(20, 168, 64, 23));
 
@@ -100,9 +103,10 @@ namespace slurp {
 	emit urlEntry->setFocus();
     }
 
-    void Interacter::updateStats( int queued, int crawled ) {
+    void Interacter::updateStats( int queued, int crawled, double avgBytesPerSecond ) {
         emit queuedNumber->display( queued );
         emit crawledNumber->display( crawled );
+        emit bitrateNumber->display( avgBytesPerSecond/1024 );
     }
 
     void Interacter::updateProgress( int n ) {

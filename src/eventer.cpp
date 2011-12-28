@@ -26,6 +26,7 @@
 #include <QSet>
 #include <QFile>
 #include <QSharedPointer>
+#include <QTime>
 
 #include "globals.h"
 #include "eventer.h"
@@ -44,6 +45,7 @@ namespace slurp {
             setApplicationName("Slurp");
 
             pagesCrawled = 0;
+            totalBytes = 0;
 
             active = false;
     }
@@ -76,7 +78,6 @@ namespace slurp {
 		queuedUrls.insert( url );
         queuedParsers.enqueue( QSharedPointer< Parser > ( new Parser( url ) ) );
 
-        emit statsChanged( queuedParsers.count(), pagesCrawled );
         emit dispatchParsers();
     }
 
@@ -86,8 +87,10 @@ namespace slurp {
             return ;
         }
 
-        ++pagesCrawled;
         QSharedPointer< Parser > thisParser = runningParserMap.take( seed );
+
+        ++pagesCrawled;
+        totalBytes += thisParser -> getTotalBytes();
 
         foreach( QUrl currentUrl, thisParser -> getResults() ) {
             emit addUrl( currentUrl );
@@ -95,7 +98,12 @@ namespace slurp {
         }
     
         emit dispatchParsers(); 
-        emit statsChanged( queuedParsers.count(), pagesCrawled );
+        emit statsChanged( 
+            queuedParsers.count(), 
+            pagesCrawled, 
+            (double)totalBytes/ ( crawlTime.elapsed()/1000 ));
+
+        qDebug() << "eventer: " << totalBytes << " bytes processed";
     } 
 
     void Eventer::stopCrawling() {
@@ -106,6 +114,7 @@ namespace slurp {
     void Eventer::startCrawling() {
         active = true;
 
+        crawlTime.start();
         retryMap.clear();
 
         emit dispatchParsers();
@@ -128,7 +137,6 @@ namespace slurp {
                 this, 
                 SLOT(parserFinished(QUrl)), 
                 Qt::QueuedConnection);
-
                 
             QObject::connect(queuedParser.data(), 
                 SIGNAL(progress(int)),

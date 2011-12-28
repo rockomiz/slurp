@@ -57,6 +57,10 @@ namespace slurp {
             return parsedUrls;
         }
 
+        quint64 getTotalBytes() const {
+            return page->totalBytes();
+        }
+
     public slots:
         
         void requestPage();

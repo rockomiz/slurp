@@ -28,6 +28,7 @@
 #include <QSet>
 #include <QFile>
 #include <QSharedPointer>
+#include <QTime>
 
 #include "globals.h"
 #include "parser.h"
@@ -43,7 +44,9 @@ namespace slurp {
         QSet < QUrl > queuedUrls;
         QMap < QUrl , int > retryMap;
         int pagesCrawled;
+        quint64 totalBytes;
         bool active;
+        QTime crawlTime;
 
     public:
 
@@ -69,7 +72,7 @@ namespace slurp {
 
     signals:
     
-        void statsChanged( int queued, int crawled );
+        void statsChanged( int queued, int crawled, double avgBytesPerSecond );
         void progressChanged( int n );
         void newUrl( QUrl url );
         void lastParserFinished();

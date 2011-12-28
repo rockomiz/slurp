@@ -47,6 +47,7 @@ namespace slurp {
 
         QWidget *centralwidget;
         QProgressBar *progressBar;
+        QLCDNumber *bitrateNumber;
         QLCDNumber *queuedNumber;
         QLCDNumber *crawledNumber;
         QTextBrowser *urlBrowser;
@@ -63,7 +64,7 @@ namespace slurp {
 
         public slots:
 
-            void updateStats( int queued, int crawled );
+            void updateStats( int queued, int crawled, double avgBytesPerSecond );
             void updateProgress( int n );
             void newUrl( QUrl url );
             void stopComplete();
