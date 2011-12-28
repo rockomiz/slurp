@@ -24,6 +24,10 @@
 #include <QPainter>
 #include <QWidget>
 #include <QUrl>
+#include <QSharedPointer>
+#include <QPointer>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 #include "globals.h"
 #include "parser.h"
@@ -31,18 +35,25 @@
 
 namespace slurp {
 
-    /* The parser constructor. It takes a target url and zeroes the page pointer */
     Parser::Parser( QUrl url) {
         this->url = url;
-        page = NULL;
+        qDebug() << "constructing parser on thread " << thread();
     }
 
     Parser::~Parser() {
-        qDebug() << "destroying parser";
+        qDebug() << "destroying parser for " << url;
+
+        QObject::disconnect(this, 0, 0, 0);
+
+        /*
+        if( networkManager ) {
+            networkManager -> deleteLater();
+        }*/
+
+        /*
         if( page ) {
-            qDebug() << "freeing page";
-            delete page;
-        }
+            page.clear();
+        }*/
     }
 	
     /* A public static function which is used to screen crawled URLs 
@@ -75,33 +86,31 @@ namespace slurp {
      * corruption and eventually a segfault. It will fail with an assertion
      * at run-time on windows. */
     void Parser::requestPage() {
-        qDebug() << "parser: constructing page instance";
+        qDebug() << "parser: constructing page instance on thread " << thread();
 
-        page = new QWebPage(this);
-
+        page = QSharedPointer< QWebPage > ( new QWebPage(this) );
+        networkManager = QPointer< QNetworkAccessManager > ( new QNetworkAccessManager(this) );
+        
+        page->setNetworkAccessManager( networkManager );
         page->settings()->setAttribute( QWebSettings::JavascriptEnabled, false );
         page->settings()->setAttribute( QWebSettings::AutoLoadImages, false );
         page->settings()->setAttribute( QWebSettings::PluginsEnabled, false );
 
         QObject::connect(
-            page, SIGNAL(loadProgress(int)),
+            page.data(), SIGNAL(loadProgress(int)),
             this, SLOT(loadProgress(int)));
         
         QObject::connect(
-            page, SIGNAL(loadFinished(bool)),
+            page.data(), SIGNAL(loadFinished(bool)),
             this, SLOT(pageLoadFinished(bool)));
 
         qDebug() << "parser: initiating page load";
         page->mainFrame()->load( url );
     }
 
-    void Parser::cleanup() {
-        qDebug() << "parser: cleaning up " << url;
-    }   
-
     void Parser::reset() {
-        page->mainFrame()->setHtml("<html><body></body></html");
         qDebug() << "resetting parser due to timeout";
+        /* TODO: stub */
     }
 
     /* The parse function is invoked after the loadFinished signal is received from 
@@ -145,7 +154,7 @@ namespace slurp {
             }
         }
 
-        emit finished(parsedUrls, this);
+        emit finished(url);
     }
 
     /* This function simply updates the GUI to tell it how far along
@@ -171,12 +180,7 @@ namespace slurp {
 		    emit parse();
         } else { 
             qDebug() << "parser: failed to parse page " << url;
-
-            emit parseFailed(url, this);
-            /* TODO: discover the reason of the failure and pass this along 
-             * with the parseFailed signal 
-             */
+            emit parseFailed(url);
         }
     }
-
 }   /* namespace slurp */

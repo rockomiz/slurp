@@ -21,6 +21,7 @@
 #include <QApplication>
 #include <QFile>
 #include <QUrl>
+#include <QSharedPointer>
 
 #include "globals.h"
 #include "eventer.h"
@@ -32,7 +33,7 @@ int main(int argc, char **argv) {
     Eventer::logFile.setFileName( "slurp.log" );
     Eventer::logFile.open( QIODevice::ReadWrite );
 
-    qInstallMsgHandler( Eventer::debugHandler );
+  //  qInstallMsgHandler( Eventer::debugHandler );
  
 	qDebug() << "slurp started up";
 
@@ -41,28 +42,36 @@ int main(int argc, char **argv) {
     Interacter inter;
 
     QObject::connect( &inter, SIGNAL( crawlClicked( QUrl ) ), 
-                      &ev, SLOT( addUrl( QUrl ) ));
+                      &ev, SLOT( addUrl( QUrl ) ), 
+                      Qt::QueuedConnection);
 
     QObject::connect( &inter, SIGNAL( crawlStarted() ),
-                      &ev, SLOT( startCrawling() ) );
+                      &ev, SLOT( startCrawling() ),
+                      Qt::QueuedConnection);
 
     QObject::connect( &inter, SIGNAL( crawlAborted() ),
-                      &ev, SLOT( stopCrawling() ) );
+                      &ev, SLOT( stopCrawling() ),
+                      Qt::QueuedConnection);
    
     QObject::connect( &inter, SIGNAL( forceCrawlAbort() ),
-                      &ev, SLOT( forceStop() ) );              
+                      &ev, SLOT( forceStop() ),
+                      Qt::QueuedConnection);              
                       
     QObject::connect( &ev, SIGNAL( newUrl( QUrl ) ), 
-                      &inter, SLOT( newUrl( QUrl ) ) );
+                      &inter, SLOT( newUrl( QUrl ) ),
+                      Qt::QueuedConnection);
 
     QObject::connect( &ev, SIGNAL( statsChanged(int, int) ),
-                      &inter, SLOT( updateStats(int, int) ) );
+                      &inter, SLOT( updateStats(int, int) ),
+                      Qt::QueuedConnection);
 
     QObject::connect( &ev, SIGNAL( progressChanged(int) ),
-                      &inter, SLOT( updateProgress(int) ) );
+                      &inter, SLOT( updateProgress(int) ), 
+                      Qt::QueuedConnection);
 
     QObject::connect( &ev, SIGNAL( lastParserFinished() ),
-                      &inter, SLOT( stopComplete() ) );
+                      &inter, SLOT( stopComplete() ),
+                      Qt::QueuedConnection);
 
     inter.show();
     return ev.exec();

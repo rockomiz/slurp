@@ -25,6 +25,7 @@
 #include <QMetaType>
 #include <QSet>
 #include <QFile>
+#include <QSharedPointer>
 
 #include "globals.h"
 #include "eventer.h"
@@ -41,12 +42,6 @@ namespace slurp {
 
             setOrganizationName("Megafrock Laboratories");
             setApplicationName("Slurp");
-
-            /* For an explanation on what this is doing and
-             * why it is needed, you need to understand Qt's 
-             * meta object compiler. 
-             */
-            qRegisterMetaType<parseResult>("parseResult");
 
             active = false;
     }
@@ -77,51 +72,28 @@ namespace slurp {
         }
          
 		queuedUrls.insert( url );
-        queuedParsers.enqueue( new Parser( url ) );
+        queuedParsers.enqueue( QSharedPointer< Parser > ( new Parser( url ) ) );
 
         emit statsChanged( queuedParsers.count(), queuedUrls.count() );
         emit dispatchParsers();
     }
 
-    void Eventer::parserFinished( parseResult urls, Parser* parser ) {
-        Parser* senderParser = 
-            reinterpret_cast< Parser* > ( QObject::sender() );
-   
-        if( senderParser != parser ) {
-            qDebug() << "warning: parser sender and object sender mismatch";
+    void Eventer::parserFinished( QUrl seed ) {
+        if( !runningParserMap.contains( seed ) ) {
+            qDebug() << "warning: got parse completion for a Url not in runningParserMap";
+            return ;
         }
 
-        qDebug() << "eventer got " << urls.count() << " urls";
+        finishedParsers.insert( runningParserMap[seed] );
+        QSharedPointer< Parser > thisParser = runningParserMap.take( seed );
 
-        foreach( QUrl currentUrl, urls ) {
+        foreach( QUrl currentUrl, thisParser -> getResults() ) {
             emit addUrl( currentUrl );
             emit newUrl( currentUrl );
         }
     
-        if( runningParsers.contains( senderParser ) ) {
-            runningParsers.erase( 
-                runningParsers.begin() +
-                runningParsers.indexOf( senderParser ) );
-        } else {
-            qDebug() << "warning: got parserFinished() from an unknown source";
-        }
-
-        finishedParsers.insert( senderParser );
-
         emit dispatchParsers(); 
-        emit consumedUrls();
         emit statsChanged( queuedParsers.count(), queuedUrls.count() );
-
-        if( runningParsers.count() == 0 ) {
-            emit lastParserFinished();
-            qDebug() << "last parser complete";
-        } else {
-            qDebug() << "there are now " 
-                     << runningParsers.count() 
-                     << " running parsers";
-        }
-
-        emit freeFinished();
     } 
 
     void Eventer::stopCrawling() {
@@ -132,7 +104,6 @@ namespace slurp {
     void Eventer::startCrawling() {
         active = true;
 
-        runningParsers.clear();
         retryMap.clear();
 
         emit dispatchParsers();
@@ -143,32 +114,36 @@ namespace slurp {
             return;
         }
 
-        while( !queuedParsers.isEmpty() && runningParsers.count() < 8 ) {
+        while( !queuedParsers.isEmpty() && runningParserMap.count() < 8 ) {
             qDebug() << "starting a new parser";
         
-            Parser* queuedParser = queuedParsers.dequeue();
+            QSharedPointer< Parser > queuedParser = queuedParsers.dequeue();
       
             emit queuedParser -> requestPage();
 
-            QObject::connect(queuedParser, SIGNAL(finished(parseResult, Parser*)), 
-                this, SLOT(parserFinished(parseResult, Parser*)));
-                
-            QObject::connect(queuedParser, SIGNAL(progress(int)),
-                this, SLOT(parserProgress(int)));
+            QObject::connect(queuedParser.data(), 
+                SIGNAL(finished(QUrl)), 
+                this, 
+                SLOT(parserFinished(QUrl)));
 
-            QObject::connect(queuedParser, SIGNAL(parseFailed(QUrl, Parser*)),
-                this, SLOT(handleParseFailure(QUrl, Parser*)));
                 
-            QObject::connect(this, SIGNAL(consumedUrls()),
-                queuedParser, SLOT(cleanup()));
+            QObject::connect(queuedParser.data(), 
+                SIGNAL(progress(int)),
+                this, 
+                SLOT(parserProgress(int)));
 
-            runningParsers.push_back( queuedParser );
+            QObject::connect(queuedParser.data(), 
+                SIGNAL(parseFailed(QUrl)),
+                this, 
+                SLOT(handleParseFailure(QUrl)));
+
+            runningParserMap.insert( queuedParser -> getUrl() , queuedParser );
 			
 			qDebug() << "queued: " << queuedParsers.count();
         }
 
         if( active && 
-            runningParsers.count() == 0 && 
+            runningParserMap.count() == 0 && 
             queuedParsers.count()  == 0 ) {
                 qDebug() << "eventer: in dispatch parsers with"
                          << "nothing running and nothing queued";
@@ -181,15 +156,12 @@ namespace slurp {
         emit progressChanged( n );
     }
 
-    void Eventer::freeFinished() {
-        foreach(Parser* cparser, finishedParsers ) {
-            qDebug() << "todo: (find out when it's safe to) delete " << cparser;
+    void Eventer::handleParseFailure( QUrl url ) {
+        if( !runningParserMap.contains( url ) ) {
+            qDebug() << "warning: got parse failure for a Url not in runningParserMap";
+            return;
         }
 
-        //finishedParsers.clear();
-    }
-
-    void Eventer::handleParseFailure( QUrl url, Parser* parser ) {
         if( !retryMap.contains( url ) ) {
             retryMap[ url ] = 1;
         } else {
@@ -199,13 +171,8 @@ namespace slurp {
         qDebug() << url << " has failed to parse " 
                  << retryMap[url] << " times";
 
-        if( runningParsers.contains( parser ) ) {
-            runningParsers.erase( 
-                runningParsers.begin() +
-                runningParsers.indexOf( parser ) );
-        } else {
-            qDebug() << "warning: got parse failure for a parser not running";
-        }
+        failedParsers.insert( runningParserMap[ url ] );
+        runningParserMap.remove( url );
 
         emit addUrl( url );
         emit dispatchParsers();
@@ -213,9 +180,6 @@ namespace slurp {
 
     void Eventer::forceStop() {
         qDebug() << "forcing stop due to timeout...\n";
-
-        foreach( Parser* parser, runningParsers ) {
-            emit parser->reset();
-        }
+        /* TODO: stub */
     }
 }    /* namespace slurp */

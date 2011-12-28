@@ -27,6 +27,7 @@
 #include <QUrl>
 #include <QSet>
 #include <QFile>
+#include <QSharedPointer>
 
 #include "globals.h"
 #include "parser.h"
@@ -37,9 +38,9 @@ namespace slurp {
     class Eventer : public QApplication {
         Q_OBJECT
 
-        QQueue < Parser* > queuedParsers;
-        QVector < Parser* > runningParsers;
-        QSet < Parser* > finishedParsers; 
+        QQueue < QSharedPointer< Parser > > queuedParsers;
+        QMap < QUrl, QSharedPointer < Parser > > runningParserMap;
+        QSet < QSharedPointer< Parser > > finishedParsers, failedParsers;
         QSet < QUrl > queuedUrls;
         QMap < QUrl , int > retryMap;
 
@@ -56,17 +57,16 @@ namespace slurp {
     public slots:    
 
         void addUrl(QUrl url);
-        void parserFinished( parseResult urls, Parser* parser );
+        void parserFinished(QUrl seed);
         void stopCrawling();
         void startCrawling();
-        void handleParseFailure( QUrl url, Parser* parser );
+        void handleParseFailure(QUrl url);
         void forceStop();
 
     private slots:
 
         void dispatchParsers();
         void parserProgress( int n );
-        void freeFinished();
 
     signals:
     

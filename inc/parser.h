@@ -24,6 +24,9 @@
 #include <QThread>
 #include <QWebPage>
 #include <QUrl>
+#include <QSharedPointer>
+#include <QNetworkAccessManager>
+#include <QPointer>
 
 #include "globals.h"
 #include "eventer.h"
@@ -35,26 +38,34 @@ namespace slurp {
         Q_OBJECT
 
         QUrl url;
-        QWebPage *page;
+        QSharedPointer< QWebPage > page;
         QList< QUrl > parsedUrls;
+        QPointer< QNetworkAccessManager > networkManager;
 
     public:
 
-        Parser( QUrl url);
+        Parser( QUrl url );
         ~Parser();
 		static bool validateUrl( QUrl url );
-	 
+
+	    QUrl getUrl() const { 
+            return url;
+        }
+
+        QList< QUrl > getResults() const {
+            return parsedUrls;
+        }
+
     public slots:
         
         void requestPage();
-        void cleanup();
         void reset();
 
     signals:
 
-        void finished( parseResult parsedUrls, Parser* parser );    
+        void finished( QUrl seed );    
         void progress( int );
-        void parseFailed( QUrl url, Parser* parser );
+        void parseFailed( QUrl url );
         
     private slots:
 
