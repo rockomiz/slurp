@@ -43,6 +43,8 @@ namespace slurp {
             setOrganizationName("Megafrock Laboratories");
             setApplicationName("Slurp");
 
+            pagesCrawled = 0;
+
             active = false;
     }
 
@@ -74,7 +76,7 @@ namespace slurp {
 		queuedUrls.insert( url );
         queuedParsers.enqueue( QSharedPointer< Parser > ( new Parser( url ) ) );
 
-        emit statsChanged( queuedParsers.count(), queuedUrls.count() );
+        emit statsChanged( queuedParsers.count(), pagesCrawled );
         emit dispatchParsers();
     }
 
@@ -84,6 +86,7 @@ namespace slurp {
             return ;
         }
 
+        ++pagesCrawled;
         QSharedPointer< Parser > thisParser = runningParserMap.take( seed );
 
         foreach( QUrl currentUrl, thisParser -> getResults() ) {
@@ -92,7 +95,7 @@ namespace slurp {
         }
     
         emit dispatchParsers(); 
-        emit statsChanged( queuedParsers.count(), queuedUrls.count() );
+        emit statsChanged( queuedParsers.count(), pagesCrawled );
     } 
 
     void Eventer::stopCrawling() {

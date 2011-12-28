@@ -42,7 +42,7 @@ namespace slurp {
         QMap < QUrl, QSharedPointer < Parser > > runningParserMap;
         QSet < QUrl > queuedUrls;
         QMap < QUrl , int > retryMap;
-
+        int pagesCrawled;
         bool active;
 
     public:
