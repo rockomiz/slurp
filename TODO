@@ -1,4 +1,3 @@
-perform network i/o accounting by keeping track of ticks and accumulating bytesReceived from web pages
 periodically write results of crawl to a database
 improve progress reporting
 improve gui
