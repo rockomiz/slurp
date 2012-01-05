@@ -23,7 +23,7 @@
 
 namespace slurp {
 
-    const static int VERSION_ID[3] = { 0, 1, 2 };
+    const static int VERSION_ID[3] = { 0, 1, 9 };
  
 	typedef QList<QUrl> parseResult;
 
