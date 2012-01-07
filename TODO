@@ -1,5 +1,22 @@
-periodically write results of crawl to a database
-improve progress reporting
-improve gui
-add more crawl options
-add the ability to push/pull crawl database to another instance of slurp over the network
+There is a lot of work to be done.
+This is a summary of features that need to be implemented.
+If you are a developer who wants to help but doesn't know where to start, look here.
+If you are not a developer but want others to implement a feature for you, submit your idea in the form of an issue.
+
+Issues are tracked by github and are submitted here: https://github.com/maxdeliso/slurp/issues
+
+DATABASE
+store crawl results in database
+add the ability to push/pull crawl database to another instance of slurp over the network (P2P)
+
+GUI
+improve gui so that it resizes gracefully
+fix ui/crawl state transition problems so that 'stop' button works properly
+
+CRAWLING
+add support for an extension language which allows for crawl behavior customization
+do accounting on bandwidth per ip and ratelimit so as to avoid potential inadvertent DOS scenarios
+
+P2P
+incorporate a framework for communicating with crawl instances over the internet
+implement an interface for synchronizing and communicating via sockets
