@@ -1,6 +1,10 @@
 Dependencies:
  Qt >= 4.7.3
 
+For Debian, if you install these packages you should be OK:
+
+$ sudo aptitude install  libqtwebkit-dev qt4-dev-tools  
+
 Linux: 
 
 $ qmake

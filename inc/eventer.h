@@ -36,28 +36,28 @@
 namespace slurp {
 
     class Parser;
-    class Eventer : public QApplication {
-        Q_OBJECT
-
-        QQueue < QSharedPointer< Parser > > queuedParsers;
-        QMap < QUrl, QSharedPointer < Parser > > runningParserMap;
+    class Eventer: public QApplication {
+        Q_OBJECT 
+           
+        QQueue < QSharedPointer < Parser > >queuedParsers;
+        QMap < QUrl, QSharedPointer < Parser > >runningParserMap;
         QSet < QUrl > queuedUrls;
-        QMap < QUrl , int > retryMap;
+        QMap < QUrl, int >retryMap;
         int pagesCrawled;
         quint64 totalBytes;
         bool active;
         QTime crawlTime;
 
-    public:
+        public:
 
-        Eventer(int& argc, char** argv);
+        Eventer(int &argc, char **argv);
 
-        static QFile logFile; 
-        static void die(const char *errmsg, int errcode );
-        static void debugHandler(QtMsgType type, const char* msg);
+        static QFile logFile;
+        static void die(const char *errmsg, int errcode);
+        static void debugHandler(QtMsgType type, const char *msg);
 
-    public slots:    
-
+        public slots:
+           
         void addUrl(QUrl url);
         void parserFinished(QUrl seed);
         void stopCrawling();
@@ -65,19 +65,19 @@ namespace slurp {
         void handleParseFailure(QUrl url);
         void forceStop();
 
-    private slots:
-
+        private slots: 
+           
         void dispatchParsers();
-        void parserProgress( int n );
+        void parserProgress(int n);
 
-    signals:
-    
-        void statsChanged( int queued, int crawled, double avgBytesPerSecond );
-        void progressChanged( int n );
-        void newUrl( QUrl url );
+        signals:
+        
+        void statsChanged(int queued, int crawled,
+                                   double avgBytesPerSecond);
+        void progressChanged(int n);
+        void newUrl(QUrl url);
         void lastParserFinished();
     };
 
-}   /* namespace slurp */
-
-#endif  /* SLURP_EVENTER_H */
+}                               /* namespace slurp */
+#endif                          /* SLURP_EVENTER_H */

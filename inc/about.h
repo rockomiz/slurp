@@ -26,22 +26,19 @@
 
 namespace slurp {
 
-    class About : public QDialog {
-        Q_OBJECT
-        
+    class About: public QDialog {
+        Q_OBJECT 
 
-        QLabel *aboutLabel, *iconLabel;
+        QLabel * aboutLabel, *iconLabel;
         QHBoxLayout *layout;
         QPixmap *iconImage;
 
-        const static QString aboutText; 
+        const static QString aboutText;
 
-        public:
+   public:
 
-        About(QWidget* parent);
-
+         About(QWidget * parent);
     };
 
-}   /* namespace slurp */
-
-#endif  /* SLURP_ABOUT_H */
+}                               /* namespace slurp */
+#endif                          /* SLURP_ABOUT_H */

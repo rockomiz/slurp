@@ -42,10 +42,10 @@
 
 namespace slurp {
 
-    class Interacter : public QMainWindow {
-        Q_OBJECT
-
-        QWidget *centralwidget;
+    class Interacter: public QMainWindow {
+        Q_OBJECT 
+           
+        QWidget * centralwidget;
         QProgressBar *progressBar;
         QLCDNumber *bitrateNumber;
         QLCDNumber *queuedNumber;
@@ -56,35 +56,34 @@ namespace slurp {
         QPushButton *crawlButton;
         QPushButton *aboutButton;
         QIcon *icon;
-        About* aboutBox;
+        About *aboutBox;
 
         public:
 
-            Interacter();
+        Interacter();
 
         public slots:
 
-            void updateStats( int queued, int crawled, double avgBytesPerSecond );
-            void updateProgress( int n );
-            void newUrl( QUrl url );
-            void stopComplete();
-            void forceCancel();
+        void updateStats(int queued, int crawled, double avgBytesPerSecond);
+        void updateProgress(int n);
+        void newUrl(QUrl url);
+        void stopComplete();
+        void forceCancel();
 
-        signals:
+        signals: 
+        
+        void crawlClicked(QUrl seedUrl);
+        void crawlStarted();
+        void crawlAborted();
+        void forceCrawlAbort();
 
-            void crawlClicked( QUrl seedUrl );
-            void crawlStarted();
-            void crawlAborted();
-            void forceCrawlAbort();
-
-        private slots:
-
-            void handleCrawl();
-            void handleAboutClicked();
-            void handleReturnPressed();
-            void handleUrlChange(const QString& newUrl);
+        private slots: 
+           
+        void handleCrawl();
+        void handleAboutClicked();
+        void handleReturnPressed();
+        void handleUrlChange(const QString & newUrl);
     };
 
-}    /* namespace slurp */
-
-#endif    /* SLURP_INTERACTER_H */
+}                               /* namespace slurp */
+#endif                          /* SLURP_INTERACTER_H */
