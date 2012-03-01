@@ -70,8 +70,8 @@ namespace slurp {
 
         urlBrowser = new QTextBrowser(centralwidget);
         urlBrowser->setGeometry(QRect(110, 129, 381, 202));
-        urlBrowser->setOpenExternalLinks( true );
-        
+        urlBrowser->setOpenExternalLinks(true);
+
         splitter = new QSplitter(centralwidget);
         splitter->setGeometry(QRect(20, 29, 471, 25));
         splitter->setOrientation(Qt::Horizontal);
@@ -88,45 +88,39 @@ namespace slurp {
 
         setCentralWidget(centralwidget);
 
-        QObject::connect( crawlButton, SIGNAL(clicked()),
-            this, SLOT(handleCrawl()) );
+        QObject::connect(crawlButton, SIGNAL(clicked()),
+                         this, SLOT(handleCrawl()));
 
-        QObject::connect( aboutButton, SIGNAL(clicked()),
-            this, SLOT(handleAboutClicked()) );
+        QObject::connect(aboutButton, SIGNAL(clicked()),
+                         this, SLOT(handleAboutClicked()));
 
-        QObject::connect( urlEntry, SIGNAL(textChanged(const QString&)), 
-            this, SLOT(handleUrlChange(const QString&)) );
+        QObject::connect(urlEntry, SIGNAL(textChanged(const QString &)),
+                         this, SLOT(handleUrlChange(const QString &)));
 
-        QObject::connect( urlEntry, SIGNAL(returnPressed()),
-            this, SLOT(handleReturnPressed()) );
+         QObject::connect(urlEntry, SIGNAL(returnPressed()),
+                          this, SLOT(handleReturnPressed()));
 
-	emit urlEntry->setFocus();
+        emit urlEntry->setFocus();
+    } void Interacter::updateStats(int queued, int crawled,
+                                   double avgBytesPerSecond) {
+        emit queuedNumber->display(queued);
+        emit crawledNumber->display(crawled);
+        emit bitrateNumber->display(avgBytesPerSecond / 1024);
     }
 
-    void Interacter::updateStats( int queued, int crawled, double avgBytesPerSecond ) {
-        emit queuedNumber->display( queued );
-        emit crawledNumber->display( crawled );
-        emit bitrateNumber->display( avgBytesPerSecond/1024 );
+    void Interacter::updateProgress(int n) {
+        emit progressBar->setValue(n);
     }
 
-    void Interacter::updateProgress( int n ) {
-        emit progressBar->setValue( n );
-    }
-
-    void Interacter::newUrl( QUrl url ) {
-        urlBrowser->append( 
-            "<a href='" + 
-            url.toString() + 
-            "'>" + 
-            url.toString() +
-            "</a> "
-        );
+    void Interacter::newUrl(QUrl url) {
+        urlBrowser->append("<a href='" +
+                           url.toString() + "'>" + url.toString() + "</a> ");
     }
 
     void Interacter::stopComplete() {
         qDebug() << "interacter: received stopComplete signal ";
 
-        crawlButton -> setText( "Crawl" );
+        crawlButton->setText("Crawl");
     }
 
     void Interacter::forceCancel() {
@@ -136,26 +130,26 @@ namespace slurp {
     }
 
     void Interacter::handleCrawl() {
-        if( crawlButton -> text() == "Crawl" ) {
-            crawlButton -> setText( "Stop" );
+        if (crawlButton->text() == "Crawl") {
+            crawlButton->setText("Stop");
 
-            QUrl seedUrl = QUrl( urlEntry->text() );
+            QUrl seedUrl = QUrl(urlEntry->text());
 
-            emit crawlClicked( seedUrl );
+            emit crawlClicked(seedUrl);
             emit crawlStarted();
-       } else if( crawlButton -> text() == "Stop" ) {
-           qDebug() << "interface: user aborted crawl";
+        } else if (crawlButton->text() == "Stop") {
+            qDebug() << "interface: user aborted crawl";
 
-           emit crawlAborted();
+            emit crawlAborted();
 
-           crawlButton -> setText( "Stopping..." );
+            crawlButton->setText("Stopping...");
 
-           /* Wait for a small interval of time and then force the stop
-            * by resetting the page content 
-            */
-           QTimer::singleShot(1000, this, SLOT(forceCancel()));
-           /* TODO: make the interval configurable */
-       }
+            /* Wait for a small interval of time and then force the stop
+             * by resetting the page content 
+             */
+            QTimer::singleShot(1000, this, SLOT(forceCancel()));
+            /* TODO: make the interval configurable */
+        }
     }
 
     void Interacter::handleAboutClicked() {
@@ -163,18 +157,18 @@ namespace slurp {
     }
 
     void Interacter::handleReturnPressed() {
-        if( crawlButton->text() == "Crawl" && 
-            Parser::validateUrl( urlEntry->text() ) ) {
+        if (crawlButton->text() == "Crawl" &&
+            Parser::validateUrl(urlEntry->text())) {
             emit handleCrawl();
         }
     }
 
-    void Interacter::handleUrlChange(const QString& newUrl) {
-        if( Parser::validateUrl( newUrl ) ) {
+    void Interacter::handleUrlChange(const QString & newUrl) {
+        if (Parser::validateUrl(newUrl)) {
             crawlButton->setEnabled(true);
         } else {
             crawlButton->setEnabled(false);
         }
     }
 
-}   /* namespace slurp */
+}                               /* namespace slurp */

@@ -34,77 +34,73 @@
 
 namespace slurp {
 
-    QFile Eventer::logFile; 
+    QFile Eventer::logFile;
 
-    Eventer::Eventer(
-        int& argc, 
-        char** argv) : QApplication( argc, argv, true ) {
-            QUrl currentUrl;
+     Eventer::Eventer(int &argc, char **argv):QApplication(argc, argv, true) {
+        QUrl currentUrl;
 
-            setOrganizationName("Megafrock Laboratories");
-            setApplicationName("Slurp");
+         setOrganizationName("Megafrock Laboratories");
+         setApplicationName("Slurp");
 
-            pagesCrawled = 0;
-            totalBytes = 0;
+         pagesCrawled = 0;
+         totalBytes = 0;
 
-            active = false;
-    }
-
-    void Eventer::die(const char *errmsg, int errcode) {
+         active = false;
+    } void Eventer::die(const char *errmsg, int errcode) {
         qFatal(errmsg);
         exit(errcode);
     }
 
-    void Eventer::debugHandler(QtMsgType type, const char* msg ) {
+    void Eventer::debugHandler(QtMsgType type, const char *msg) {
         (void)type;
 
-        logFile.write( msg, qstrlen( msg ) );
-        logFile.write( "\n", 1 );
+        logFile.write(msg, qstrlen(msg));
+        logFile.write("\n", 1);
     }
 
-    void Eventer::addUrl( QUrl url ) {
-        if( retryMap.contains( url ) && retryMap[ url ] >= 3 ) {
-            qDebug() << "discarding url because we've failed to parse it thrice" 
-                     << url;
+    void Eventer::addUrl(QUrl url) {
+        if (retryMap.contains(url) && retryMap[url] >= 3) {
+            qDebug() << "discarding url because we've failed to parse it thrice"
+                << url;
             emit dispatchParsers();
             return;
-        } 
-        
-        if( queuedUrls.contains( url ) && !retryMap.contains( url) ) {
+        }
+
+        if (queuedUrls.contains(url) && !retryMap.contains(url)) {
             qDebug() << "discarding duplicate not in retry map" << url;
             return;
         }
-         
-		queuedUrls.insert( url );
-        queuedParsers.enqueue( QSharedPointer< Parser > ( new Parser( url ) ) );
+
+        queuedUrls.insert(url);
+        queuedParsers.enqueue(QSharedPointer < Parser > (new Parser(url)));
 
         emit dispatchParsers();
     }
 
-    void Eventer::parserFinished( QUrl seed ) {
-        if( !runningParserMap.contains( seed ) ) {
-            qDebug() << "warning: got parse completion for a Url not in runningParserMap";
-            return ;
+    void Eventer::parserFinished(QUrl seed) {
+        if (!runningParserMap.contains(seed)) {
+            qDebug() <<
+                "warning: got parse completion for a Url not in runningParserMap";
+            return;
         }
 
-        QSharedPointer< Parser > thisParser = runningParserMap.take( seed );
+        QSharedPointer < Parser > thisParser = runningParserMap.take(seed);
 
         ++pagesCrawled;
-        totalBytes += thisParser -> getTotalBytes();
+        totalBytes += thisParser->getTotalBytes();
 
-        foreach( QUrl currentUrl, thisParser -> getResults() ) {
-            emit addUrl( currentUrl );
-            emit newUrl( currentUrl );
+        foreach(QUrl currentUrl, thisParser->getResults()) {
+            emit addUrl(currentUrl);
+            emit newUrl(currentUrl);
         }
-    
-        emit dispatchParsers(); 
-        emit statsChanged( 
-            queuedParsers.count(), 
-            pagesCrawled, 
-            (double)totalBytes/ ( crawlTime.elapsed()/1000 ));
+
+        emit dispatchParsers();
+        emit statsChanged(queuedParsers.count(),
+                          pagesCrawled,
+                          (double)totalBytes / (crawlTime.elapsed() / 1000));
 
         qDebug() << "eventer: " << totalBytes << " bytes processed";
-    } 
+    }
 
     void Eventer::stopCrawling() {
         qDebug() << "user aborted crawl";
@@ -121,72 +117,69 @@ namespace slurp {
     }
 
     void Eventer::dispatchParsers() {
-        if( !active ) {
+        if (!active) {
             return;
         }
 
-        while( !queuedParsers.isEmpty() && runningParserMap.count() < 8 ) {
+        while (!queuedParsers.isEmpty() && runningParserMap.count() < 8) {
             qDebug() << "starting a new parser";
-        
-            QSharedPointer< Parser > queuedParser = queuedParsers.dequeue();
-      
-            emit queuedParser -> requestPage();
 
-            QObject::connect(queuedParser.data(), 
-                SIGNAL(finished(QUrl)), 
-                this, 
-                SLOT(parserFinished(QUrl)), 
-                Qt::QueuedConnection);
-                
-            QObject::connect(queuedParser.data(), 
-                SIGNAL(progress(int)),
-                this, 
-                SLOT(parserProgress(int)), 
-                Qt::QueuedConnection);
+            QSharedPointer < Parser > queuedParser = queuedParsers.dequeue();
 
-            QObject::connect(queuedParser.data(), 
-                SIGNAL(parseFailed(QUrl)),
-                this, 
-                SLOT(handleParseFailure(QUrl)), 
-                Qt::QueuedConnection);
+            emit queuedParser->requestPage();
 
-            runningParserMap.insert( queuedParser -> getUrl() , queuedParser );
-			
-			qDebug() << "queued: " << queuedParsers.count();
+            QObject::connect(queuedParser.data(),
+                             SIGNAL(finished(QUrl)),
+                             this,
+                             SLOT(parserFinished(QUrl)), Qt::QueuedConnection);
+
+            QObject::connect(queuedParser.data(),
+                             SIGNAL(progress(int)),
+                             this,
+                             SLOT(parserProgress(int)), Qt::QueuedConnection);
+
+            QObject::connect(queuedParser.data(),
+                             SIGNAL(parseFailed(QUrl)),
+                             this,
+                             SLOT(handleParseFailure(QUrl)),
+                             Qt::QueuedConnection);
+
+            runningParserMap.insert(queuedParser->getUrl(), queuedParser);
+
+            qDebug() << "queued: " << queuedParsers.count();
         }
 
-        if( active && 
-            runningParserMap.count() == 0 && 
-            queuedParsers.count()  == 0 ) {
-                qDebug() << "eventer: in dispatch parsers with"
-                         << "nothing running and nothing queued";
-                active = false;
-                emit lastParserFinished();
+        if (active &&
+            runningParserMap.count() == 0 && queuedParsers.count() == 0) {
+            qDebug() << "eventer: in dispatch parsers with"
+                << "nothing running and nothing queued";
+            active = false;
+            emit lastParserFinished();
         }
     }
-    
-    void Eventer::parserProgress( int n ) {
-        emit progressChanged( n );
+
+    void Eventer::parserProgress(int n) {
+        emit progressChanged(n);
     }
 
-    void Eventer::handleParseFailure( QUrl url ) {
-        if( !runningParserMap.contains( url ) ) {
-            qDebug() << "warning: got parse failure for a Url not in runningParserMap";
+    void Eventer::handleParseFailure(QUrl url) {
+        if (!runningParserMap.contains(url)) {
+            qDebug() <<
+                "warning: got parse failure for a Url not in runningParserMap";
             return;
         }
 
-        if( !retryMap.contains( url ) ) {
-            retryMap[ url ] = 1;
+        if (!retryMap.contains(url)) {
+            retryMap[url] = 1;
         } else {
-            ++retryMap[ url ];
+            ++retryMap[url];
         }
 
-        qDebug() << url << " has failed to parse " 
-                 << retryMap[url] << " times";
+        qDebug() << url << " has failed to parse " << retryMap[url] << " times";
 
-        runningParserMap.remove( url );
+        runningParserMap.remove(url);
 
-        emit addUrl( url );
+        emit addUrl(url);
         emit dispatchParsers();
     }
 
@@ -194,4 +187,4 @@ namespace slurp {
         qDebug() << "forcing stop due to timeout...\n";
         /* TODO: stub */
     }
-}    /* namespace slurp */
+}                               /* namespace slurp */
