@@ -22,7 +22,7 @@
 #include <QUrl>
 
 namespace slurp {
-    const static int VERSION_ID[3] = { 0, 1, 9 };
+    const static int VERSION_ID[3] = { 0, 2, 0 };
     const static char ORGANIZATION_NAME[] = "Megafrock Laboratories";
     const static char APPLICATION_NAME[] = "Slurp";
 }                               /* namespace slurp */
