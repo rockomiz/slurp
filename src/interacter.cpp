@@ -123,12 +123,6 @@ namespace slurp {
         crawlButton->setText("Crawl");
     }
 
-    void Interacter::forceCancel() {
-        qDebug() << "interacter: forcing cancel due to timeout";
-
-        emit forceCrawlAbort();
-    }
-
     void Interacter::handleCrawl() {
         if (crawlButton->text() == "Crawl") {
             crawlButton->setText("Stop");
@@ -140,15 +134,8 @@ namespace slurp {
         } else if (crawlButton->text() == "Stop") {
             qDebug() << "interface: user aborted crawl";
 
-            emit crawlAborted();
-
             crawlButton->setText("Stopping...");
-
-            /* Wait for a small interval of time and then force the stop
-             * by resetting the page content 
-             */
-            QTimer::singleShot(1000, this, SLOT(forceCancel()));
-            /* TODO: make the interval configurable */
+            emit crawlAborted();
         }
     }
 

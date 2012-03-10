@@ -63,7 +63,6 @@ namespace slurp {
         void stopCrawling();
         void startCrawling();
         void handleParseFailure(QUrl url);
-        void forceStop();
 
         private slots: 
            

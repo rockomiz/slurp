@@ -68,14 +68,12 @@ namespace slurp {
         void updateProgress(int n);
         void newUrl(QUrl url);
         void stopComplete();
-        void forceCancel();
 
         signals: 
         
         void crawlClicked(QUrl seedUrl);
         void crawlStarted();
         void crawlAborted();
-        void forceCrawlAbort();
 
         private slots: 
            

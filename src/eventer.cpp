@@ -182,9 +182,4 @@ namespace slurp {
         emit addUrl(url);
         emit dispatchParsers();
     }
-
-    void Eventer::forceStop() {
-        qDebug() << "forcing stop due to timeout...\n";
-        /* TODO: stub */
-    }
 }                               /* namespace slurp */

@@ -51,9 +51,6 @@ int main(int argc, char **argv)
     QObject::connect(&inter, SIGNAL(crawlAborted()),
                      &ev, SLOT(stopCrawling()), Qt::QueuedConnection);
 
-    QObject::connect(&inter, SIGNAL(forceCrawlAbort()),
-                     &ev, SLOT(forceStop()), Qt::QueuedConnection);
-
     QObject::connect(&ev, SIGNAL(newUrl(QUrl)),
                      &inter, SLOT(newUrl(QUrl)), Qt::QueuedConnection);
 
