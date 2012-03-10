@@ -34,43 +34,50 @@
 namespace slurp {
 
     class Eventer;
+
     class Parser: public QObject {
-        Q_OBJECT QUrl url;
-        QSharedPointer < QWebPage > page;
-        QList < QUrl > parsedUrls;
-        QPointer < QNetworkAccessManager > networkManager;
-        QSet < QWebFrame * >pageFrames;
+        Q_OBJECT 
+
+           QUrl url;
+           QSharedPointer < QWebPage > page;
+           QList < QUrl > parsedUrls;
+           QPointer < QNetworkAccessManager > networkManager;
+           QSet < QWebFrame * >pageFrames;
 
         public:
 
-        Parser(QUrl url);
-        ~Parser();
-        static bool validateUrl(QUrl url);
+           Parser(QUrl url);
+           ~Parser();
 
-        inline QUrl getUrl() const {
-            return url;
-        } 
+           static bool validateUrl(QUrl url);
+
+           inline QUrl getUrl() const {
+              return url;
+           } 
         
-        inline QList < QUrl > getResults() const {
-            return parsedUrls;
-        } 
+           inline QList < QUrl > getResults() const {
+              return parsedUrls;
+           } 
         
-        inline quint64 getTotalBytes() const {
-            return page->totalBytes();
-        } 
+           inline quint64 getTotalBytes() const {
+              return page->totalBytes();
+           } 
         
-        public slots:void requestPage();
-        void reset();
+        public slots:
+           
+           void requestPage();
 
         signals: 
         
-        void finished(QUrl seed);
-        void progress(int);
-        void parseFailed(QUrl url);
+           void finished(QUrl seed);
+           void progress(int);
+           void parseFailed(QUrl url);
 
-        private slots: void parse();
-        void loadProgress(int n);
-        void pageLoadFinished(bool ok);
+        private slots: 
+           
+           void parse();
+           void loadProgress(int n);
+           void pageLoadFinished(bool ok);
     };
 }                               /* namespace slurp */
 #endif                          /* SLURP_PARSER_H */

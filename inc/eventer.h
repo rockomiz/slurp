@@ -39,44 +39,43 @@ namespace slurp {
     class Eventer: public QApplication {
         Q_OBJECT 
            
-        QQueue < QSharedPointer < Parser > >queuedParsers;
-        QMap < QUrl, QSharedPointer < Parser > >runningParserMap;
-        QSet < QUrl > queuedUrls;
-        QMap < QUrl, int >retryMap;
-        int pagesCrawled;
-        quint64 totalBytes;
-        bool active;
-        QTime crawlTime;
+           QQueue < QSharedPointer < Parser > >queuedParsers;
+           QMap < QUrl, QSharedPointer < Parser > >runningParserMap;
+           QSet < QUrl > queuedUrls;
+           QMap < QUrl, int >retryMap;
+           int pagesCrawled;
+           quint64 totalBytes;
+           bool active;
+           QTime crawlTime;
 
         public:
 
-        Eventer(int &argc, char **argv);
+           Eventer(int &argc, char **argv);
 
-        static QFile logFile;
-        static void die(const char *errmsg, int errcode);
-        static void debugHandler(QtMsgType type, const char *msg);
+           static QFile logFile;
+           static void die(const char *errmsg, int errcode);
+           static void debugHandler(QtMsgType type, const char *msg);
 
         public slots:
            
-        void addUrl(QUrl url);
-        void parserFinished(QUrl seed);
-        void stopCrawling();
-        void startCrawling();
-        void handleParseFailure(QUrl url);
+           void addUrl(QUrl url);
+           void parserFinished(QUrl seed);
+           void stopCrawling();
+           void startCrawling();
+           void handleParseFailure(QUrl url);
 
         private slots: 
            
-        void dispatchParsers();
-        void parserProgress(int n);
+           void dispatchParsers();
+           void parserProgress(int n);
 
         signals:
         
-        void statsChanged(int queued, int crawled,
+           void statsChanged(int queued, int crawled,
                                    double avgBytesPerSecond);
-        void progressChanged(int n);
-        void newUrl(QUrl url);
-        void lastParserFinished();
+           void progressChanged(int n);
+           void newUrl(QUrl url);
+           void lastParserFinished();
     };
-
 }                               /* namespace slurp */
 #endif                          /* SLURP_EVENTER_H */

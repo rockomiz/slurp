@@ -45,43 +45,42 @@ namespace slurp {
     class Interacter: public QMainWindow {
         Q_OBJECT 
            
-        QWidget * centralwidget;
-        QProgressBar *progressBar;
-        QLCDNumber *bitrateNumber;
-        QLCDNumber *queuedNumber;
-        QLCDNumber *crawledNumber;
-        QTextBrowser *urlBrowser;
-        QSplitter *splitter;
-        QLineEdit *urlEntry;
-        QPushButton *crawlButton;
-        QPushButton *aboutButton;
-        QIcon *icon;
-        About *aboutBox;
+           QWidget * centralwidget;
+           QProgressBar *progressBar;
+           QLCDNumber *bitrateNumber;
+           QLCDNumber *queuedNumber;
+           QLCDNumber *crawledNumber;
+           QTextBrowser *urlBrowser;
+           QSplitter *splitter;
+           QLineEdit *urlEntry;
+           QPushButton *crawlButton;
+           QPushButton *aboutButton;
+           QIcon *icon;
+           About *aboutBox;
 
         public:
 
-        Interacter();
+           Interacter();
 
         public slots:
 
-        void updateStats(int queued, int crawled, double avgBytesPerSecond);
-        void updateProgress(int n);
-        void newUrl(QUrl url);
-        void stopComplete();
+           void updateStats(int queued, int crawled, double avgBytesPerSecond);
+           void updateProgress(int n);
+           void newUrl(QUrl url);
+           void stopComplete();
 
         signals: 
         
-        void crawlClicked(QUrl seedUrl);
-        void crawlStarted();
-        void crawlAborted();
+           void crawlClicked(QUrl seedUrl);
+           void crawlStarted();
+           void crawlAborted();
 
         private slots: 
            
-        void handleCrawl();
-        void handleAboutClicked();
-        void handleReturnPressed();
-        void handleUrlChange(const QString & newUrl);
+           void handleCrawl();
+           void handleAboutClicked();
+           void handleReturnPressed();
+           void handleUrlChange(const QString & newUrl);
     };
-
 }                               /* namespace slurp */
 #endif                          /* SLURP_INTERACTER_H */
