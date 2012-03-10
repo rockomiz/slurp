@@ -46,7 +46,9 @@ namespace slurp {
          totalBytes = 0;
 
          active = false;
-    } void Eventer::die(const char *errmsg, int errcode) {
+    } 
+     
+    void Eventer::die(const char *errmsg, int errcode) {
         qFatal(errmsg);
         exit(errcode);
     }
