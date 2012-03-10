@@ -105,8 +105,20 @@ namespace slurp {
     }
 
     void Eventer::stopCrawling() {
-        qDebug() << "user aborted crawl";
+        /* FIXME: may need a mutex here to guard against race conditions
+         * on rapid state transition */
+
+        qDebug() << "user stopped crawl with "
+                 << runningParserMap.count() << " running parsers";
+
         active = false;
+
+        foreach(QSharedPointer<Parser> p, runningParserMap.values()) {
+           p->blockSignals(true);
+           p.clear();
+        }
+
+        runningParserMap.clear();
     }
 
     void Eventer::startCrawling() {

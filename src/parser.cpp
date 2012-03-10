@@ -38,7 +38,9 @@ namespace slurp {
     Parser::Parser(QUrl url) {
         this->url = url;
         qDebug() << "constructing parser on thread " << thread();
-    } Parser::~Parser() {
+    } 
+    
+    Parser::~Parser() {
         qDebug()
             << "destroying parser for "
             << url

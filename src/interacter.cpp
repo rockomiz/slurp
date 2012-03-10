@@ -134,7 +134,7 @@ namespace slurp {
         } else if (crawlButton->text() == "Stop") {
             qDebug() << "interface: user aborted crawl";
 
-            crawlButton->setText("Stopping...");
+            crawlButton->setText("Crawl");
             emit crawlAborted();
         }
     }

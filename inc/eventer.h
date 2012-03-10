@@ -39,8 +39,8 @@ namespace slurp {
     class Eventer: public QApplication {
         Q_OBJECT 
            
-           QQueue < QSharedPointer < Parser > >queuedParsers;
-           QMap < QUrl, QSharedPointer < Parser > >runningParserMap;
+           QQueue < QSharedPointer < Parser > > queuedParsers;
+           QMap < QUrl, QSharedPointer < Parser > > runningParserMap;
            QSet < QUrl > queuedUrls;
            QMap < QUrl, int >retryMap;
            int pagesCrawled;
