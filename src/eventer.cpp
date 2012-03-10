@@ -39,8 +39,8 @@ namespace slurp {
      Eventer::Eventer(int &argc, char **argv):QApplication(argc, argv, true) {
         QUrl currentUrl;
 
-         setOrganizationName("Megafrock Laboratories");
-         setApplicationName("Slurp");
+         setOrganizationName(ORGANIZATION_NAME);
+         setApplicationName(APPLICATION_NAME);
 
          pagesCrawled = 0;
          totalBytes = 0;

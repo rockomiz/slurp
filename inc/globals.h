@@ -23,5 +23,7 @@
 
 namespace slurp {
     const static int VERSION_ID[3] = { 0, 1, 9 };
+    const static char ORGANIZATION_NAME[] = "Megafrock Laboratories";
+    const static char APPLICATION_NAME[] = "Slurp";
 }                               /* namespace slurp */
 #endif                          /* SLURP_GLOBALS_H */
