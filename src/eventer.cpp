@@ -42,10 +42,11 @@ namespace slurp {
          setOrganizationName(ORGANIZATION_NAME);
          setApplicationName(APPLICATION_NAME);
 
-         pagesCrawled = 0;
+         totalCrawled = 0;
          totalBytes = 0;
-
          active = false;
+
+         stopCrawling();
     } 
      
     void Eventer::die(const char *errmsg, int errcode) {
@@ -88,8 +89,11 @@ namespace slurp {
 
         QSharedPointer < Parser > thisParser = runningParserMap.take(seed);
 
-        ++pagesCrawled;
+        ++totalCrawled;
+        ++currentCrawled;
+
         totalBytes += thisParser->getTotalBytes();
+        currentBytes += thisParser->getTotalBytes();
 
         foreach(QUrl currentUrl, thisParser->getResults()) {
             emit addUrl(currentUrl);
@@ -98,8 +102,8 @@ namespace slurp {
 
         emit dispatchParsers();
         emit statsChanged(queuedParsers.count(),
-                          pagesCrawled,
-                          (double)totalBytes / (crawlTime.elapsed() / 1000));
+                          totalCrawled,
+                          (double)currentBytes / (crawlTime.elapsed() / 1000));
 
         qDebug() << "eventer: " << totalBytes << " bytes processed";
     }
@@ -109,9 +113,12 @@ namespace slurp {
          * on rapid state transition */
 
         qDebug() << "user stopped crawl with "
-                 << runningParserMap.count() << " running parsers";
+                 << runningParserMap.count() 
+                 << " running parsers";
 
         active = false;
+        currentCrawled = 0;
+        currentBytes = 0;
 
         foreach(QSharedPointer<Parser> p, runningParserMap.values()) {
            p->blockSignals(true);
@@ -119,6 +126,11 @@ namespace slurp {
         }
 
         runningParserMap.clear();
+
+        emit statsChanged(
+              queuedParsers.count(),
+              totalCrawled,
+              0);
     }
 
     void Eventer::startCrawling() {

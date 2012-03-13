@@ -43,8 +43,8 @@ namespace slurp {
            QMap < QUrl, QSharedPointer < Parser > > runningParserMap;
            QSet < QUrl > queuedUrls;
            QMap < QUrl, int >retryMap;
-           int pagesCrawled;
-           quint64 totalBytes;
+           int totalCrawled, currentCrawled;
+           quint64 totalBytes, currentBytes;
            bool active;
            QTime crawlTime;
 
