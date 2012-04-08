@@ -35,142 +35,142 @@
 
 namespace slurp {
 
-    Parser::Parser(QUrl url) {
-        this->url = url;
-        qDebug() << "constructing parser on thread " << thread();
-    } 
+   Parser::Parser(QUrl url) {
+      this->url = url;
+      qDebug() << "constructing parser on thread " << thread();
+   }
     
-    Parser::~Parser() {
-        qDebug()
-            << "destroying parser for "
-            << url
-            << " with network manager " << networkManager
-            << " and page instance " << page.data()
-            << " on thread " << thread();
+   Parser::~Parser() {
+      qDebug() << "destroying parser for "
+         << url
+         << " with network manager " << networkManager
+         << " and page instance " << page.data()
+         << " on thread " << thread();
 
-        if (networkManager) {
-            networkManager->deleteLater();
-        }
+      if (networkManager) {
+         networkManager->deleteLater();
+      }
 
-        if (page) {
-            page.clear();
-        }
+      if (page) {
+         page.clear();
+      }
+   }
+
+   /* A public static function which is used to screen crawled URLs
+    * for potential queuing
+    */
+   bool Parser::validateUrl(QUrl url) {
+      if (!url.isValid()) {
+         qDebug() << "discarding invalid " << url;
+         return false;
+      } else if (url.scheme() == "https") {
+         qDebug() << "discarding https " << url;
+         return false;
+      } else if (url.host() == "") {
+         qDebug() << "discarding url with no host" << url;
+         eturn false;
+      }
+
+       return true;
     }
 
-    /* A public static function which is used to screen crawled URLs 
-     * for potential queuing 
+   /* This function constructs a page instance and initiates network I/O.
+    * Note that this function must always run on the GUI thread ( the eventer
+    * thread ). Even though QWebPage doesn't inherit from QWidget it will
+    * still make window manager calls which all must come from the same
+    * thread. Attempting to put this call into a separate thread WILL cause
+    * heap corruption and eventually a segfault. It will fail with an
+    * assertion at run-time on windows, though linux will allow it. */
+   void Parser::requestPage() {
+      qDebug() << "parser: constructing page instance on thread " << thread();
+
+      page = QSharedPointer < QWebPage > (new QWebPage(this));
+      networkManager =
+         QPointer < QNetworkAccessManager >
+         (new QNetworkAccessManager(this));
+
+      /* TODO: reuse one global instance of QWebSettings */
+      page->setNetworkAccessManager(networkManager);
+      page->settings()->setAttribute(QWebSettings::JavascriptEnabled, false);
+      page->settings()->setAttribute(QWebSettings::AutoLoadImages, false);
+      page->settings()->setAttribute(QWebSettings::PluginsEnabled, false);
+
+      QObject::connect(page.data(), SIGNAL(loadProgress(int)),
+         this, SLOT(loadProgress(int)), Qt::QueuedConnection);
+
+      QObject::connect(page.data(), SIGNAL(loadFinished(bool)),
+         this, SLOT(pageLoadFinished(bool)),
+         Qt::QueuedConnection);
+
+      qDebug() << "parser: initiating page load";
+      page->mainFrame()->load(url);
+   }
+
+    /* The parse function is invoked after the loadFinished signal is received 
+     * from  the webkit code upon successfully parsing a page. From here, the 
+     * entire DOM can be manipulated and traversed really conveniently. The 
+     * code right now just traverses the DOM looking for link tags, and queues 
+     * them if they are valid, but this function is where all of the 
+     * interesting development will take place in the future. 
      */
-    bool Parser::validateUrl(QUrl url) {
-        if (!url.isValid()) {
-            qDebug() << "discarding invalid " << url;
-            return false;
-        } else if (url.scheme() == "https") {
-            qDebug() << "discarding https " << url;
-            return false;
-        } else if (url.host() == "") {
-            qDebug() << "discarding url with no host" << url;
-            return false;
-        }
+   void Parser::parse() {
+      QUrl currentUrl;
+      QWebElementCollection linkTags =
+         page->mainFrame()->findAllElements("a");
 
-        return true;
-    }
+      foreach(QWebElement current, linkTags) {
+         currentUrl = QUrl(current.attribute("href"));
+         /* This discards the fragment. It is useless in this context and
+          * will complicate our visited hashtable.
+          */
+         currentUrl.setEncodedFragment(QByteArray());
 
-    /* This function constructs a page instance and initiates network I/O.
-     * Note that this function must always run on the GUI thread ( the eventer
-     * thread. Even though QWebPage doesn't inherit from QWidget it will still
-     * make window manager calls which all must come from the same thread.
-     * Attempting to put this call into a separate thread WILL cause heap
-     * corruption and eventually a segfault. It will fail with an assertion
-     * at run-time on windows. */
-    void Parser::requestPage() {
-        qDebug() << "parser: constructing page instance on thread " << thread();
+         if (currentUrl.isEmpty()) {
+            continue;
+         }
 
-        page = QSharedPointer < QWebPage > (new QWebPage(this));
-        networkManager =
-            QPointer < QNetworkAccessManager >
-            (new QNetworkAccessManager(this));
+         /* Prepend the parent URL if we have a relative link in an attempt
+          * to validate it for retrieval.
+          */
+         if (currentUrl.isRelative() &&
+            currentUrl.host() == "" && currentUrl.path() != "") {
+            qDebug() << currentUrl << " is relative path. prepending host";
+            currentUrl.setHost(url.host());
+            currentUrl.setScheme(url.scheme());
+            qDebug() << "with host fix: " << currentUrl;
+         }
 
-        page->setNetworkAccessManager(networkManager);
-        page->settings()->setAttribute(QWebSettings::JavascriptEnabled, false);
-        page->settings()->setAttribute(QWebSettings::AutoLoadImages, false);
-        page->settings()->setAttribute(QWebSettings::PluginsEnabled, false);
+         /* Finally, check to make sure it's valid before queueing it */
+         if (validateUrl(currentUrl)) {
+            parsedUrls.push_back(currentUrl);
+         }
+      }
 
-        QObject::connect(page.data(), SIGNAL(loadProgress(int)),
-                         this, SLOT(loadProgress(int)), Qt::QueuedConnection);
-
-        QObject::connect(page.data(), SIGNAL(loadFinished(bool)),
-                         this, SLOT(pageLoadFinished(bool)),
-                         Qt::QueuedConnection);
-
-        qDebug() << "parser: initiating page load";
-        page->mainFrame()->load(url);
-    }
-
-    /* The parse function is invoked after the loadFinished signal is received from 
-     * the webkit code upon successfully parsing a page. From here, the entire DOM
-     * can be manipulated and traversed really conveniently. The code right now
-     * just traverses the DOM looking for link tags, and queues them if they are 
-     * valid, but this function is where all of the interesting development will
-     * take place in the future. 
-     */
-    void Parser::parse() {
-        QUrl currentUrl;
-        QWebElementCollection linkTags =
-            page->mainFrame()->findAllElements("a");
-
-        foreach(QWebElement current, linkTags) {
-            currentUrl = QUrl(current.attribute("href"));
-            /* This discards the fragment. It is useless in this context and 
-             * will complicate our visited hashtable.
-             */
-            currentUrl.setEncodedFragment(QByteArray());
-
-            if (currentUrl.isEmpty()) {
-                continue;
-            }
-
-            /* Prepend the parent URL if we have a relative link in an attempt to 
-             * validate it for retrieval.
-             */
-            if (currentUrl.isRelative() &&
-                currentUrl.host() == "" && currentUrl.path() != "") {
-                qDebug() << currentUrl << " is relative path. prepending host";
-                currentUrl.setHost(url.host());
-                currentUrl.setScheme(url.scheme());
-                qDebug() << "with host fix: " << currentUrl;
-            }
-
-            /* Finally, check to make sure it's valid before queueing it */
-            if (validateUrl(currentUrl)) {
-                parsedUrls.push_back(currentUrl);
-            }
-        }
-
-        emit finished(url);
-    }
+   emit finished(url);
+   } /* Parser::parse */
 
     /* This function simply updates the GUI to tell it how far along
      * this page is in being loaded. 
      */
-    void Parser::loadProgress(int n) {
-        qDebug() << "parser: " << url << " load progress " << n;
+   void Parser::loadProgress(int n) {
+      qDebug() << "parser: " << url << " load progress " << n;
 
-        QCoreApplication::flush();
-        emit progress(n);
-    }
+      QCoreApplication::flush();
+      emit progress(n);
+   }
 
-    /* This function is connected to the webkit code and receives the load
-     * results. On successful load, it schedules a parse. Otherwise, it 
-     * reports failure. 
-     */
-    void Parser::pageLoadFinished(bool ok) {
-        if (ok) {
-            qDebug() << "parser: " << url << " page load finished ok.";
+   /* This function is connected to the webkit code and receives the load
+    * results. On successful load, it schedules a parse. Otherwise, it
+    * reports failure.
+    */
+   void Parser::pageLoadFinished(bool ok) {
+      if (ok) {
+         qDebug() << "parser: " << url << " page load finished ok.";
 
-            emit parse();
-        } else {
-            qDebug() << "parser: failed to parse page " << url;
-            emit parseFailed(url);
-        }
-    }
-}                               /* namespace slurp */
+         emit parse();
+      } else {
+         qDebug() << "parser: failed to parse page " << url;
+         emit parseFailed(url);
+      }
+   }
+}   /* namespace slurp */

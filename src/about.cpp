@@ -26,27 +26,29 @@
 
 namespace slurp {
 
-    const QString About::aboutText = " slurp v" +
-        QString('0' + VERSION_ID[0]) + "." +
-        QString('0' + VERSION_ID[1]) + "." +
-        QString('0' + VERSION_ID[2]) +
-        " coded by Max DeLiso <maxdeliso@gmail.com>";
+const QString About::aboutText =
+   " slurp v"
+   + QString('0' + VERSION_ID[0]) + "."
+   + QString('0' + VERSION_ID[1]) + "."
+   + QString('0' + VERSION_ID[2]) +
+   " coded by Max DeLiso <maxdeliso@gmail.com>";
 
-     About::About(QWidget * parent):
-        QDialog(parent,
-                Qt::Dialog |
-                Qt::WindowTitleHint |
-                Qt::WindowSystemMenuHint |
-                Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint) {
-        iconImage = new QPixmap("res/slurp.png");
-        layout = new QHBoxLayout(this);
-        aboutLabel = new QLabel(aboutText, this);
-        iconLabel = new QLabel(this);
+   About::About(QWidget * parent) :
+      QDialog(parent,
+         Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint
+         | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint) {
 
-        iconLabel->setPixmap(*iconImage);
+      iconImage = new QPixmap("res/slurp.png");
+      layout = new QHBoxLayout(this);
+      aboutLabel = new QLabel(aboutText, this);
+      iconLabel = new QLabel(this);
 
-        layout->addWidget(iconLabel);
-        layout->addWidget(aboutLabel);
+      iconLabel->setPixmap(*iconImage);
 
-        setLayout(layout);
-}}                              /* namespace slurp */
+      layout->addWidget(iconLabel);
+      layout->addWidget(aboutLabel);
+
+      setLayout (layout);
+}
+
+} /* namespace slurp */

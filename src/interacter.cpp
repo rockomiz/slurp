@@ -45,117 +45,118 @@
 
 namespace slurp {
 
-    Interacter::Interacter() {
-        icon = new QIcon("res/slurp.png");
+   Interacter::Interacter() {
+      icon = new QIcon("res/slurp.png");
 
-        setWindowIcon(*icon);
-        setFixedSize(512, 361);
+      setWindowIcon(*icon);
+      setFixedSize(512, 361);
 
-        aboutBox = new About(this);
+      aboutBox = new About(this);
 
-        centralwidget = new QWidget(this);
+      centralwidget = new QWidget(this);
 
-        progressBar = new QProgressBar(centralwidget);
-        progressBar->setGeometry(QRect(20, 69, 481, 31));
-        progressBar->setValue(0);
+      progressBar = new QProgressBar(centralwidget);
+      progressBar->setGeometry(QRect(20, 69, 481, 31));
+      progressBar->setValue(0);
 
-        bitrateNumber = new QLCDNumber(centralwidget);
-        bitrateNumber->setGeometry(QRect(20, 207, 64, 23));
+      bitrateNumber = new QLCDNumber(centralwidget);
+      bitrateNumber->setGeometry(QRect(20, 207, 64, 23));
 
-        queuedNumber = new QLCDNumber(centralwidget);
-        queuedNumber->setGeometry(QRect(20, 168, 64, 23));
+      queuedNumber = new QLCDNumber(centralwidget);
+      queuedNumber->setGeometry(QRect(20, 168, 64, 23));
 
-        crawledNumber = new QLCDNumber(centralwidget);
-        crawledNumber->setGeometry(QRect(20, 129, 64, 23));
+      crawledNumber = new QLCDNumber(centralwidget);
+      crawledNumber->setGeometry(QRect(20, 129, 64, 23));
 
-        urlBrowser = new QTextBrowser(centralwidget);
-        urlBrowser->setGeometry(QRect(110, 129, 381, 202));
-        urlBrowser->setOpenExternalLinks(true);
+      urlBrowser = new QTextBrowser(centralwidget);
+      urlBrowser->setGeometry(QRect(110, 129, 381, 202));
+      urlBrowser->setOpenExternalLinks(true);
 
-        splitter = new QSplitter(centralwidget);
-        splitter->setGeometry(QRect(20, 29, 471, 25));
-        splitter->setOrientation(Qt::Horizontal);
+      splitter = new QSplitter(centralwidget);
+      splitter->setGeometry(QRect(20, 29, 471, 25));
+      splitter->setOrientation(Qt::Horizontal);
 
-        urlEntry = new QLineEdit("http://", splitter);
-        splitter->addWidget(urlEntry);
+      urlEntry = new QLineEdit("http://", splitter);
+      splitter->addWidget(urlEntry);
 
-        crawlButton = new QPushButton("Crawl", splitter);
-        crawlButton->setEnabled(false);
-        splitter->addWidget(crawlButton);
+      crawlButton = new QPushButton("Crawl", splitter);
+      crawlButton->setEnabled(false);
+      splitter->addWidget(crawlButton);
 
-        aboutButton = new QPushButton("About", splitter);
-        splitter->addWidget(aboutButton);
+      aboutButton = new QPushButton("About", splitter);
+      splitter->addWidget(aboutButton);
 
-        setCentralWidget(centralwidget);
+      setCentralWidget(centralwidget);
 
-        QObject::connect(crawlButton, SIGNAL(clicked()),
-                         this, SLOT(handleCrawl()));
+      QObject::connect(crawlButton, SIGNAL(clicked()),
+         this, SLOT(handleCrawl()));
 
-        QObject::connect(aboutButton, SIGNAL(clicked()),
-                         this, SLOT(handleAboutClicked()));
+      QObject::connect(aboutButton, SIGNAL(clicked()),
+         this, SLOT(handleAboutClicked()));
 
-        QObject::connect(urlEntry, SIGNAL(textChanged(const QString &)),
-                         this, SLOT(handleUrlChange(const QString &)));
+      QObject::connect(urlEntry, SIGNAL(textChanged(const QString &)),
+         this, SLOT(handleUrlChange(const QString &)));
 
-         QObject::connect(urlEntry, SIGNAL(returnPressed()),
-                          this, SLOT(handleReturnPressed()));
+      QObject::connect(urlEntry, SIGNAL(returnPressed()),
+         this, SLOT(handleReturnPressed()));
 
-        emit urlEntry->setFocus();
-    } void Interacter::updateStats(int queued, int crawled,
-                                   double avgBytesPerSecond) {
-        emit queuedNumber->display(queued);
-        emit crawledNumber->display(crawled);
-        emit bitrateNumber->display(avgBytesPerSecond / 1024);
+      emit urlEntry->setFocus();
     }
 
-    void Interacter::updateProgress(int n) {
-        emit progressBar->setValue(n);
-    }
+   void Interacter::updateStats(int queued, int crawled,
+      double avgBytesPerSecond) {
+         emit queuedNumber->display(queued);
+         emit crawledNumber->display(crawled);
+         emit bitrateNumber->display(avgBytesPerSecond / 1024);
+   }
 
-    void Interacter::newUrl(QUrl url) {
-        urlBrowser->append("<a href='" +
-                           url.toString() + "'>" + url.toString() + "</a> ");
-    }
+   void Interacter::updateProgress(int n) {
+      emit progressBar->setValue(n);
+   }
 
-    void Interacter::stopComplete() {
-        qDebug() << "interacter: received stopComplete signal ";
+   void Interacter::newUrl(QUrl url) {
+      urlBrowser->append("<a href='" +
+         url.toString() + "'>" + url.toString() + "</a> ");
+   }
 
-        crawlButton->setText("Crawl");
-    }
+   void Interacter::stopComplete() {
+      qDebug() << "interacter: received stopComplete signal ";
 
-    void Interacter::handleCrawl() {
-        if (crawlButton->text() == "Crawl") {
-            crawlButton->setText("Stop");
+      crawlButton->setText("Crawl");
+   }
 
-            QUrl seedUrl = QUrl(urlEntry->text());
+   void Interacter::handleCrawl() {
+      if (crawlButton->text() == "Crawl") {
+         crawlButton->setText("Stop");
 
-            emit crawlClicked(seedUrl);
-            emit crawlStarted();
-        } else if (crawlButton->text() == "Stop") {
-            qDebug() << "interface: user aborted crawl";
+         QUrl seedUrl = QUrl(urlEntry->text());
 
-            crawlButton->setText("Crawl");
-            emit crawlAborted();
-        }
-    }
+         emit crawlClicked(seedUrl);
+         emit crawlStarted();
+      } else if (crawlButton->text() == "Stop") {
+         qDebug() << "interface: user aborted crawl";
 
-    void Interacter::handleAboutClicked() {
-        aboutBox->show();
-    }
+         crawlButton->setText("Crawl");
+         emit crawlAborted();
+      }
+   }
 
-    void Interacter::handleReturnPressed() {
-        if (crawlButton->text() == "Crawl" &&
-            Parser::validateUrl(urlEntry->text())) {
+   void Interacter::handleAboutClicked() {
+      aboutBox->show();
+   }
+
+   void Interacter::handleReturnPressed() {
+      if (crawlButton->text() == "Crawl" &&
+         Parser::validateUrl(urlEntry->text())) {
             emit handleCrawl();
-        }
-    }
+         }
+   }
 
-    void Interacter::handleUrlChange(const QString & newUrl) {
-        if (Parser::validateUrl(newUrl)) {
-            crawlButton->setEnabled(true);
-        } else {
-            crawlButton->setEnabled(false);
-        }
-    }
-
-}                               /* namespace slurp */
+   void Interacter::handleUrlChange(const QString & newUrl) {
+      if (Parser::validateUrl(newUrl)) {
+         crawlButton->setEnabled(true);
+      } else {
+         crawlButton->setEnabled(false);
+      }
+   }
+}   /* namespace slurp */
