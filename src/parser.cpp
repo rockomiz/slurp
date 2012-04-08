@@ -68,7 +68,7 @@ namespace slurp {
          return false;
       } else if (url.host() == "") {
          qDebug() << "discarding url with no host" << url;
-         eturn false;
+         return false;
       }
 
        return true;
