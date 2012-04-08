@@ -64,14 +64,10 @@ namespace slurp {
         if (!url.isValid()) {
             qDebug() << "discarding invalid " << url;
             return false;
-        }
-
-        if (url.scheme() == "https") {
+        } else if (url.scheme() == "https") {
             qDebug() << "discarding https " << url;
             return false;
-        }
-
-        if (url.host() == "") {
+        } else if (url.host() == "") {
             qDebug() << "discarding url with no host" << url;
             return false;
         }
