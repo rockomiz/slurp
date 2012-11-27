@@ -1,3 +1,8 @@
+A full rewrite moving away from Qt and instead using webkit 2.0 directly.
+Planned within 2013.
+
+LEGACY NOTES:
+
 There is a lot of work to be done.
 This is a summary of features that need to be implemented.
 If you are a developer who wants to help but doesn't know where to start, look here.
