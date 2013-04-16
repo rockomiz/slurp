@@ -63,8 +63,7 @@ namespace slurp {
 
    void Eventer::addUrl(QUrl url) {
       if (retryMap.contains(url) && retryMap[url] >= 3) {
-         qDebug() << "discarding url because we've "
-            << "failed to parse it thrice"
+         qDebug() << "discarding url because we've failed to parse it thrice"
             << url;
          emit dispatchParsers();
          return;
@@ -81,8 +80,7 @@ namespace slurp {
 
    void Eventer::parserFinished(QUrl seed) {
       if (!runningParserMap.contains(seed)) {
-         qDebug() << "warning: got parse completion for a Url "
-                << "not in runningParserMap";
+         qDebug() << "warning: got parse completion for a Url not in runningParserMap";
          return;
       }
 
@@ -181,8 +179,7 @@ namespace slurp {
 
       if (active &&
          runningParserMap.count() == 0 && queuedParsers.count() == 0) {
-            qDebug() << "eventer: in dispatch parsers with"
-               << "nothing running and nothing queued";
+            qDebug() << "eventer: in dispatch parsers with nothing running and nothing queued";
             active = false;
             emit lastParserFinished();
         }
