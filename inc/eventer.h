@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Slurp - a web crawler
  * Copyright (C) 2011 Joseph Max DeLiso
 

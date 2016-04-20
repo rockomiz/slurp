@@ -10,8 +10,11 @@ RCC_DIR = obj/rcc
 UI_DIR = obj/ui
 
 # Link in the required libraries
-CONFIG += qt debug console 
-QT = core gui network webkit 
+CONFIG += qt debug console
+
+QT += network
+QT += webkitwidgets
+QT += widgets
 
 # Input
 HEADERS += \

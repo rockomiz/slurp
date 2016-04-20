@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Slurp - a web crawler
  * Copyright (C) 2011 Joseph Max DeLiso
 
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
     Eventer::logFile.setFileName("slurp.log");
     Eventer::logFile.open(QIODevice::ReadWrite);
 
-    qInstallMsgHandler(Eventer::debugHandler);
+//    qInstallMessageHandler(Eventer::debugHandler);
 
     qDebug() << "slurp started up";
 

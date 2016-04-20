@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Slurp - a web crawler
  * Copyright (C) 2011 Joseph Max DeLiso
 
@@ -123,7 +123,7 @@ namespace slurp {
          /* This discards the fragment. It is useless in this context and
           * will complicate our visited hashtable.
           */
-         currentUrl.setEncodedFragment(QByteArray());
+         currentUrl.setFragment(QByteArray());
 
          if (currentUrl.isEmpty()) {
             continue;
